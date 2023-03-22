@@ -1,7 +1,8 @@
->>> def decToHex(dec):
-	if dec.isnumeric(): # to check if the input is valid (number 0-9)
+def decToHex(dec):
+	if dec.isnumeric(): # to check if the input is valid, numbers 0-9
 		if dec == 0:
 			return 0
+		dec = int(dec)
 		hexDig = "0123456789ABCDEF"
 		hexStr = ""
 		while dec > 0:
@@ -11,16 +12,8 @@
 		return hexStr
 	else: print("In base 10 you can enter numbers between 0-9")
 
-
->>> def containHex(hexa): 
-	allow = "A,B,C,D,E,F,1,2,3,4,5,6,7,8,9,0" # list of allowed words
-	for char in hexa:
-		if char not in allow:
-			return False
-	return True	
-
-
->>> def hexToDecimal(hexa):
+	
+def hexToDecimal(hexa):
 	hexa = str(hexa) # cast to string variable
 	if(containHex(hexa)):
 		dec = 0
@@ -30,3 +23,25 @@
 			dec = dec * 16 + value # create the decimal number
 		return dec
 	else: print("Input number is not from base 16")
+
+	
+def containHex(hexa):
+	allow = "A,B,C,D,E,F,1,2,3,4,5,6,7,8,9,0" # list of allowed words
+	for char in hexa:
+		if char not in allow:
+			return False
+	return True
+
+
+def starter(): # Menu function
+	choice = 0
+	while choice != "-1":
+		choice = input("hello please choose: 1 - convert from Dec to Hex, 2 - convert from Hex to Dec, -1 - Finish program")
+		if choice == "1":
+			select = input("Enter number to convert")
+			print(decToHex(select))
+		if choice == "2":
+			select = input("Enter number to convert")
+			print(hexToDec(select))
+	print("Bye Bye")
+
