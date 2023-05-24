@@ -1,0 +1,86 @@
+#include <LiquidCrystal.h>
+#include <LiquidCrystal_I2C.h>
+#include <Servo.h>
+
+const int TRIG_PIN = 10;
+const int ECHO_PIN = 11;
+const int SERVO_PIN = 9;
+const int LED_PIN = 8;
+
+LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
+//LiquidCrystal_I2C lcd_1(0x27,7, 6, 5, 4, 3, 2);
+int pos = 0;
+float previousdistance = 30;
+int TEMP_PIN = A0;
+float distance_us, distance;
+int temp_input, temp;
+Servo servo;
+
+void setup()
+{
+   //initialize the LCD
+  //lcd.init();
+  //turn on the blacklight and print a message
+  //lcd.backlight();
+  lcd.begin(16, 2);
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  pinMode(SERVO_PIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
+  servo.attach(SERVO_PIN);
+  servo.write(0);
+  Serial.begin(9600);
+}
+
+void loop()
+{
+ // Measure distance
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+  distance_us = pulseIn(ECHO_PIN, HIGH);
+  distance = distance_us*0.017;
+  // Measure temperature
+  temp_input = analogRead(TEMP_PIN);
+  temp = map(((temp_input/1024.0)*5-0.5)*100,0,1023,-50,125);
+
+  // Display temperature on LCD
+  //lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Tami 4 ");
+  //lcd.setBacklight(1);
+  //lcd.print("Temp: ");
+  //lcd.print(temp);
+  //lcd.print("C");
+
+  // Activate servo motor and LED if object is within 20cm and temperature is below 10C
+  // And if the distance had not change
+  if (distance <= 20 && temp < 27 && abs(distance - previousdistance) > 5.00) {
+    previousdistance = distance;
+    lcd.setCursor(0, 1);
+    lcd.print("Water pouring");
+    //lcd.setBacklight(1);
+    digitalWrite(LED_PIN, HIGH);
+    servo.write(360);
+    delay(1000);
+    servo.write(0);
+    delay(4000);
+    digitalWrite(LED_PIN, LOW);
+  }
+
+  else {
+    lcd.setCursor(0, 1);
+    lcd.print(" ");
+    digitalWrite(LED_PIN, LOW);
+    servo.write(0);
+  }
+  
+  Serial.println("distance: ");
+  Serial.println(distance);
+  Serial.println("temp: ");
+  Serial.println(temp);
+
+delay(500);
+}
