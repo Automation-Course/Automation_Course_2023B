@@ -1,0 +1,94 @@
+#include <Servo.h>
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+bool doorOpen;
+bool doorlocked = true;
+int servoPin = 6; // pin for the servo
+int sensorState = 0;// setup sensor State low
+bool State_ON = false;   // bool for sensor state 
+int buzerPin = 8; // pin for buzer
+int ledRedPin = 2; // pin for led
+int i = 0; // index of the servo
+
+LiquidCrystal_I2C lcd(0x27, 16,2);
+Servo servo;
+
+void setup()
+{
+  Serial.begin(9600);
+  servo.attach(servoPin);
+  pinMode(4, INPUT);
+  servo.write(0); // setup the servo 
+
+  pinMode(buzerPin, OUTPUT);
+  pinMode(ledRedPin, OUTPUT);
+  pinMode(ledRedPin, OUTPUT);
+  lcd.init();
+
+  // Turn on the blacklight and print a message.
+  // lcd.backlight();
+
+}
+
+void loop()
+{
+ 
+  sensorState = digitalRead(4);
+  // if sensor state HIGH - door is unlock
+   if (sensorState == HIGH) {
+      State_ON = true;
+      doorlocked = false;
+  } else State_ON = false;
+
+ 
+  // if sensor state open and door unlock - the door open
+  if(State_ON  and !doorlocked){
+   doorOpen = true;
+  }else{
+    doorOpen =false;
+  }
+  
+  // if the door lock - turn off the buzer and the led
+  if(!doorOpen and doorlocked){
+    digitalWrite(ledRedPin , LOW);
+    digitalWrite(buzerPin , LOW);
+    lcd.setCursor(0,0); 
+    lcd.print("door is locked");
+    Serial.print("door is locked") ;
+  }
+  
+  // if the door finish open - close the door
+  if(!doorOpen and !doorlocked){
+   lcd.setCursor(0,0);
+   lcd.print("door is closing now") ;
+   Serial.print("door is closing now") ;
+    if(i != 0){
+      i = i - 10;
+      servo.write(i); 
+    }
+    if(i ==  0){
+      doorlocked = true;
+    }
+  }
+
+  // if the door open - turn on the buzer and the led  
+  if(doorOpen){
+    lcd.setCursor(0,0);
+    lcd.print("door is open now") ;
+    Serial.print("the door is open") ;
+    digitalWrite(ledRedPin , HIGH);
+    digitalWrite(buzerPin , HIGH);
+    open();
+    delay(2000);
+  } 
+}
+// function to open the door
+void open(){
+ for(int i=0; i<=90; i=i+10)
+  {
+   servo.write(90);
+  } 
+  i = 90;
+  State_ON = false;
+}
