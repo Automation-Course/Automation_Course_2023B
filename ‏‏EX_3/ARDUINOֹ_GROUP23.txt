@@ -4,13 +4,18 @@
 #define servoPin  9 // Arduino pin connected to Servo Motor's pin
 
 Servo Myservo;
-int pos=90;
+int pos=0;
+int pos2=0;
 long offAt=0;
 long offAtservo=2147483647;
+long offAtservo2=2147483647;
 bool IsClose= true;
-int angle = 0;
-int speed = 0;
-bool Direction = true; 
+bool IsCloseServo= true;
+//int angle = 0;
+//int speed = 0;
+//bool Direction = true; 
+//int switchState = 0; //Set Switch State
+//int lastSwitchState = 0; //previous state of the button
 
 
 
@@ -54,7 +59,7 @@ void loop() {
   if( (digitalRead(LED_PIN) == LOW ) && (digitalRead(BUTTON_PIN) == LOW) ) //if LED is off  and button is pressed [low because it has pullup resistor]
   { 
     digitalWrite(LED_PIN, HIGH);
-    offAt = millis() + 1000; //store var of now + 3 seconds
+    offAt = millis() + 2000; //store var of now + 3 seconds
     lcd.print("WELCOME!!!!!!!!");
    
   }
@@ -68,25 +73,25 @@ void loop() {
         
       }
   }
-    if(digitalRead(BUTTON_PIN) == LOW){
-     Direction=!Direction;
-   }
+
+
+  
+ 
+
+   
 if (digitalRead(BUTTON_PIN) == LOW &&  (IsClose==true) && millis() <= offAtservo  ) {
-    offAtservo = millis() + 1000; //store var of now + 90 DEGREES
+    offAtservo = millis() + 250; //store var of now + 90 DEGREES
      IsClose=false; 
+     pos=0;
+     pos2=0;
   }
-    if (millis() <= offAtservo && !IsClose ){
-        if (Direction){  
+    if (millis() <= offAtservo && !IsClose ){  
         Myservo.write(180);  
-     }
-     else
-     Myservo.write(0); 
     }
      else {
        Myservo.write(90);  
-      
-       IsClose=true;
        offAtservo = 2147483647;
+       IsClose=true;
      }
 
 
@@ -103,21 +108,59 @@ if (digitalRead(BUTTON_PIN) == LOW &&  (IsClose==true) && millis() <= offAtservo
   // calculate the distance
   distance_cm = duration_us*0.017;
 
-  if(distance_cm>10)
+  if(distance_cm>5)
   {
-  //  Myservo.write(90); // rotate servo motor to 90 degree
     digitalWrite(10, LOW);
    
   }
   else
-  
   {
-    digitalWrite(10, HIGH);
+    pos += 1;
+    if ((IsCloseServo==true) && millis() <= offAtservo2  &&  pos<50) {
+    offAtservo2 = millis() + 250; //store var of now + 90 DEGREES
+     IsCloseServo=false; 
+     
+  }
+    if (millis() <= offAtservo2 && !IsCloseServo ){  
+        Myservo.write(0);  
+        digitalWrite(10, HIGH);
+    }
+     else {
+       Myservo.write(90);  
+       IsCloseServo=true;
+       offAtservo2 = 2147483647;
+       digitalWrite(10, LOW);
+     }
+   }
+ if(distance_cm<30)
+  {
+    digitalWrite(10, LOW);
+   
+  }
+  else
+  {
+    pos2 += 1;
+    if ((IsCloseServo==true) && millis() <= offAtservo2  &&  pos2<70) {
+    offAtservo2 = millis() + 250; //store var of now + 90 DEGREES
+     IsCloseServo=false; 
+     
+  }
+    if (millis() <= offAtservo2 && !IsCloseServo ){  
+        Myservo.write(0);  
+        digitalWrite(10, HIGH);
+    }
+     else {
+       Myservo.write(90);  
+       IsCloseServo=true;
+       offAtservo2 = 2147483647;
+       digitalWrite(10, LOW);
+     }
    }
 
-  // print the value to Serial Monitor
+
+  //print the value to Serial Monitor
   Serial.print("distance: ");
-  Serial.print(Direction);
+  Serial.print(distance_cm);
   Serial.println(" cm");
    
 }
