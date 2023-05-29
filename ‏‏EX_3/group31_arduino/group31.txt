@@ -1,0 +1,92 @@
+// C++ code 
+//group31
+
+#define LedPin 4
+#define Ultra_Sonic_Trig  5
+#define Ultra_Sonic_Echo  2
+#include <stdio.h>
+#define Sound_Pin 3
+#include <Servo.h>
+#define Servo_Pin 9 
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h> 
+LiquidCrystal_I2C lcd(0x27, 16,2);
+Servo servo;
+int has_visitor = 0;
+int angle = 0;
+long Sample_Time;
+float distance;
+long distanceTime;
+
+
+void setup()
+{
+  pinMode(LedPin,OUTPUT);
+  Serial.begin(9600);
+  pinMode(Ultra_Sonic_Trig, OUTPUT); // Sets the trigPin as an OUTPUT
+  pinMode(Ultra_Sonic_Echo, INPUT); 
+  pinMode(Sound_Pin, OUTPUT);
+  servo.attach(Servo_Pin);
+  lcd.begin(16,2);
+  lcd.init();
+  lcd.clear();
+  lcd.setBacklight(HIGH); // activate the backlight
+  lcd.setCursor(0,0);
+  lcd.print("Hello Maya!");
+  noTone(Sound_Pin);
+}
+
+void loop()
+{  
+  digitalWrite(Sound_Pin, LOW);
+  readDistance();
+  digitalWrite(LedPin, LOW);
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+
+if (distance > 10 && distance < 100 ){ //the distance need to be closer than the wall
+
+      digitalWrite(LedPin, HIGH);
+      servo.write(180);
+     upAndDownAlarm();
+     lcd.clear();
+      lcd.setCursor(0, 0); 
+      lcd.print("Welcome to");
+     lcd.setCursor(0, 1);  // stand on the second line
+      lcd.print("Smart Toilet!");
+      has_visitor = 1;
+     }
+else{
+  if(has_visitor == 1){
+          servo.write(90);
+          lcd.clear();
+          lcd.setCursor(0, 0); 
+          lcd.print("Goodbye From");
+          lcd.setCursor(0, 1);  // stand on the second line
+          lcd.print("Group 31!");
+          digitalWrite (Sound_Pin, LOW);
+  }
+}
+}
+
+
+
+void readDistance(){
+
+ digitalWrite(Ultra_Sonic_Trig, LOW);
+  delayMicroseconds(2);
+ digitalWrite(Ultra_Sonic_Trig, HIGH);
+ delayMicroseconds(10);
+  digitalWrite(Ultra_Sonic_Trig, LOW);
+  Sample_Time = pulseIn(Ultra_Sonic_Echo, HIGH);
+ distance = Sample_Time * 0.034 / 2; // Back and forth divided by 2 
+}
+
+void upAndDownAlarm(){
+    tone(Sound_Pin, 220, 100);
+    delay(200);
+    tone(Sound_Pin, 1000, 100);
+    delay(200);
+}
