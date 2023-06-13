@@ -1,0 +1,103 @@
+#include <Encoder.h>
+#include <PIDController.h>
+
+// Motor pins
+const int motorPin1 = 10;
+const int motorPin2 = 11;
+const int enA = 9;
+
+// Encoder pins
+const int encoderPin1 = 2;
+const int encoderPin2 = 3;
+
+// PID constants
+ float kp = 1;
+ float ki = 0.17;
+ float kd = 0.13;
+ float goal_deg=0; //= 0.0;
+
+// Global variables
+Encoder encoder(encoderPin1,encoderPin2);
+PIDController pidController;
+double angle = 0.0; // current angle of the pendulum
+
+ void get_deegree_input(){
+  goal_deg = Serial.parseFloat();
+  Serial.read();    // get the ENTER char from the serial
+}  
+ void get_kp_input(){
+  kp = Serial.parseFloat();
+  Serial.read();    // get the ENTER char from the serial
+}  
+ void get_ki_input(){
+  ki = Serial.parseFloat();
+  Serial.read();    // get the ENTER char from the serial
+ 
+}  
+ void get_kd_input(){
+  kd = Serial.parseFloat();
+  Serial.read();    // get the ENTER char from the serial
+
+}  
+
+
+
+void setup() {
+ 
+  
+  // Initialize motor pins as output
+  Serial.begin(9600);
+  pinMode(enA, OUTPUT);
+  pinMode(motorPin1, OUTPUT);
+  pinMode(motorPin2, OUTPUT);
+  pidController.begin(); // Initialize the PID controller
+  pidController.limit(-180, 180); // The PID output can be limited to values between -255 to 255
+  pidController.tune(kp, ki, kd); // Set PID parameters
+
+  Serial.print("Write the deegere,kp,ki,kd , you want to send to the motor");
+
+
+}
+
+void loop() {
+ if (Serial.available()>0){ // Wait for User to Input Data
+    get_deegree_input();
+    // get_kp_input();
+    // get_ki_input();
+    // get_kd_input();
+   
+     pidController.setpoint(goal_deg); // the goal angle
+    }
+
+  // // Read encoder and calculate current angle of pendulum
+  long encoderCount = encoder.read();
+  angle = tick_to_deg(encoderCount);
+
+  // // Calculate control signal
+   double control = pidController.compute(angle);
+   //Serial.print("angle: ");
+   
+   Serial.println(angle);
+
+  if (control > 0.0) {
+    forward();
+  } else {
+    reverse();
+  }
+  //Send pwm power to motor
+  analogWrite(enA, abs(255*control*4/100)); 
+}
+//Convert ticks to degrees
+float tick_to_deg(long tick){
+    return tick*360.0/440.0;
+}
+
+void forward(){
+  digitalWrite(motorPin1, HIGH);
+  digitalWrite(motorPin2, LOW);
+  }
+
+void reverse(){
+  digitalWrite(motorPin1, LOW);
+  digitalWrite(motorPin2, HIGH);
+  }
