@@ -1,0 +1,59 @@
+import java.util.Scanner;
+
+public class BaseCalc {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter a number: ");
+        String num = scanner.nextLine();
+
+        System.out.print("Choose the base of the number (10 or 16): ");
+        int Base = scanner.nextInt();
+
+        if (Base == 10) {
+            // Convert decimal to hex
+            String hex = Dec2hex(Integer.parseInt(num));
+            System.out.println("The decimal number " + num + " in hexadecimal is " + hex);
+        } else if (Base == 16) {
+            // Convert hex to decimal
+            int dec = hex2Dec(num);
+            System.out.println("The hexadecimal number " + num + " in decimal is " + dec);
+        } else {
+            System.out.println("Invalid base.");
+        }
+    }
+    
+    // decimal to hexadecimal
+    public static String Dec2hex(int dec) {
+        String hex = "";
+        while (dec > 0) {
+            int mode = dec % 16;
+            if (mode < 10) {
+                hex = mode + hex;
+            } else {
+                hex = (char) (mode - 10 + 'A') + hex;
+            }
+            dec /= 16;
+        }
+        return hex;
+    }
+    
+    // hexadecimal to decimal
+    public static int hex2Dec(String hex) {
+        int dec = 0;
+        for (int i = 0; i < hex.length(); i++) {
+        	
+            char c = hex.charAt(i);
+            if (c >= '0' && c <= '9') {
+            	dec = dec * 16 + (c - '0');
+            } else if (c >= 'A' && c <= 'F') {
+                dec = dec * 16 + (c - 'A' + 10);
+            } else if (c >= 'a' && c <= 'f') {
+            	dec = dec * 16 + (c - 'a' + 10);
+            } else {
+                throw new IllegalArgumentException("Invalid hexadecimal string: " + hex);
+            }
+        }
+        return dec;
+    }
+}
