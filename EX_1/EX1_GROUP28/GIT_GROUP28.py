@@ -63,7 +63,7 @@ def hex_to_dec(number): #convert hexadecimal number to decimal number
         numbers_after_point = number_length - point_index - 1 # What is the lowest power that needs to be multiplied by
         while number[-1] != ".":#As long as we calculate the number after the point
             now = int(get_numeric(number[-1])) #The last digit in the hexadecimal number
-            ans += now*(16*(numbers_after_point*(-1))) #Add the value of the number in decimal base to the answer
+            ans += now*(16**(numbers_after_point*(-1))) #Add the value of the number in decimal base to the answer
             number = number[:-1] #remove the last digit from the hexadecimal number
             numbers_after_point -= 1 #increases the power
         number = number[:-1] #remove the dot
